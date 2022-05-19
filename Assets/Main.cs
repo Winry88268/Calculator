@@ -20,6 +20,7 @@ public class Main : MonoBehaviour
     public Answer m_answerDisplay;
 
     bool m_error;
+    int m_parentheses;
     
     void Start()
     {
@@ -44,6 +45,7 @@ public class Main : MonoBehaviour
         m_multdivIndex.Clear();
         m_answer = null;
         m_error = false;
+        m_parentheses = 0;
     }
 
     //New number input process
@@ -82,6 +84,9 @@ public class Main : MonoBehaviour
         //Impossible input - do nothing until cleared
         if(m_error) return;
 
+        //No open Parentheses - do nothing to avoid error
+        if(m_parentheses == 0 && f == ")") return;
+
         //Add to Functions list
         m_functions.Add(f);
             
@@ -92,6 +97,16 @@ public class Main : MonoBehaviour
         }
         else
         {
+            //Parentheses opened counter
+            if(f == "(")
+            {
+                m_parentheses++;
+            }
+            else if(f == ")")
+            {
+                m_parentheses--;
+            }
+
             //Equation Display to update
             m_equationDisplay.m_equation.Enqueue(f);
         }
@@ -150,11 +165,48 @@ public class Main : MonoBehaviour
             m_answerDisplay.updateAnswer("Error: Div/0");
             m_error = true;
         }
+        catch (FormatException)
+        {
+            m_answerDisplay.updateAnswer("Error: Div/0");
+            m_error = true;
+        }
     }
+
+    // TODO
+    // Multiple Parentheses in a single Calculation
+    // Powers of Parentheses
+    // Nested Parentheses
 
     void parentheses()
     {
+         //Iterate functions - tuple<index,function> for ( & )
+        foreach(var v in m_functions)
+        {
+            if(v == "(" | v == ")")
+            {
+                m_parenthesesIndex.Add(new Tuple<int, string>(m_functions.IndexOf(v), v));
+            }
+        }
 
+        //If any parentheses
+        if(m_powersIndex != null)
+        {
+            while(m_parenthesesIndex.Count > 0)
+            {
+                int? indexPair = findMatchingParentheses();
+                
+                
+            }
+        }
+    }
+
+    int? findMatchingParentheses()
+    {
+        for(int i = 0; i < m_parenthesesIndex.Count - 1; i++)
+        {
+            if(m_parenthesesIndex[i].Item2 == "(" && m_parenthesesIndex[i + 1].Item2 == ")") return i;   
+        }
+        return null;
     }
 
     void powers()
